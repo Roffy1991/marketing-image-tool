@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>营销物料生图工具</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- 左侧配置面板 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1 class="logo">营销生图</h1>
+        <p class="subtitle">AI 一键生成多尺寸营销物料</p>
+      </div>
+
+      <!-- 输入区 -->
+      <section class="section">
+        <h2 class="section-title">活动信息</h2>
+        <div class="field">
+          <label for="theme">活动主题 <span class="required">*</span></label>
+          <input id="theme" type="text" placeholder="例：双11购物节促销活动" />
+        </div>
+        <div class="field">
+          <label for="headline">主标题文案 <span class="required">*</span></label>
+          <input id="headline" type="text" placeholder="例：限时5折 狂欢购" />
+        </div>
+        <div class="field">
+          <label for="button-text">按钮文字</label>
+          <input id="button-text" type="text" placeholder="例：立即抢购" />
+        </div>
+        <div class="field">
+          <label for="prompt-text">提示词</label>
+          <textarea id="prompt-text" rows="4" placeholder="例：科技感、霓虹、赛博朋克；主色调金色深蓝；画面留白充足…"></textarea>
+        </div>
+      </section>
+
+      <!-- 尺寸选择 -->
+      <section class="section">
+        <h2 class="section-title">输出尺寸</h2>
+        <div class="size-actions">
+          <button class="btn-link" id="select-all">全选</button>
+          <span class="divider">|</span>
+          <button class="btn-link" id="deselect-all">全不选</button>
+        </div>
+        <div class="size-list" id="size-list">
+          <!-- 由 JS 渲染 -->
+        </div>
+
+        <!-- 自定义尺寸表单 -->
+        <div class="custom-size-form" id="custom-size-form">
+          <input id="custom-name" type="text" placeholder="名称" />
+          <div class="custom-size-wh">
+            <input id="custom-w" type="number" placeholder="宽 px" min="1" />
+            <span>×</span>
+            <input id="custom-h" type="number" placeholder="高 px" min="1" />
+          </div>
+          <button class="btn-add-size" id="add-size-btn">添加</button>
+        </div>
+        <button class="btn-link btn-toggle-custom" id="toggle-custom-btn">＋ 自定义尺寸</button>
+      </section>
+
+      <!-- 扣子配置 -->
+      <section class="section">
+        <h2 class="section-title">工作流配置</h2>
+        <div class="field">
+          <label for="coze-token">API Token <span class="required">*</span></label>
+          <input id="coze-token" type="password" placeholder="Bearer pat_xxx…" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="workflow-id">Workflow ID <span class="required">*</span></label>
+          <input id="workflow-id" type="text" placeholder="7xxxxxxxxxxxxx" />
+        </div>
+      </section>
+
+      <button class="btn-primary" id="generate-btn">
+        <span class="btn-icon">✦</span> 一键生成
+      </button>
+    </aside>
+
+    <!-- 右侧结果面板 -->
+    <main class="canvas">
+      <div class="canvas-header">
+        <h2 class="canvas-title">生成结果</h2>
+        <button class="btn-secondary" id="download-all-btn" disabled>下载全部</button>
+      </div>
+      <div class="result-grid" id="result-grid">
+        <div class="empty-state">
+          <div class="empty-icon">◎</div>
+          <p>选择尺寸并填写活动信息<br />点击「一键生成」开始创作</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
