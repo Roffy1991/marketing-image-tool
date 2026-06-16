@@ -19,12 +19,16 @@
       <section class="section">
         <h2 class="section-title">活动信息</h2>
         <div class="field">
-          <label for="theme">活动主题 <span class="required">*</span></label>
-          <input id="theme" type="text" placeholder="例：双11购物节促销活动" />
+          <label for="theme">活动主标题</label>
+          <input id="theme" type="text" placeholder="例：限时5折 狂欢购" />
         </div>
         <div class="field">
-          <label for="headline">主标题文案 <span class="required">*</span></label>
-          <input id="headline" type="text" placeholder="例：限时5折 狂欢购" />
+          <label for="headline">活动副标题</label>
+          <input id="headline" type="text" placeholder="例：双11购物节促销活动" />
+        </div>
+        <div class="field">
+          <label for="tag-text">标签</label>
+          <input id="tag-text" type="text" placeholder="例：新品上市" />
         </div>
         <div class="field">
           <label for="button-text">按钮文字</label>
@@ -32,7 +36,7 @@
         </div>
         <div class="field">
           <label for="prompt-text">提示词</label>
-          <textarea id="prompt-text" rows="4" placeholder="例：科技感、霓虹、赛博朋克；主色调金色深蓝；画面留白充足…"></textarea>
+          <textarea id="prompt-text" rows="4" placeholder="例：主标题：限时5折&#10;副标题：双11购物节&#10;标签：新品上市&#10;按钮文字：立即抢购&#10;科技感、霓虹、赛博朋克；主色调金色深蓝…"></textarea>
         </div>
       </section>
 
@@ -61,16 +65,52 @@
         <button class="btn-link btn-toggle-custom" id="toggle-custom-btn">＋ 自定义尺寸</button>
       </section>
 
-      <!-- 扣子配置 -->
+      <!-- API 供应商配置 -->
       <section class="section">
-        <h2 class="section-title">工作流配置</h2>
-        <div class="field">
-          <label for="coze-token">API Token <span class="required">*</span></label>
-          <input id="coze-token" type="password" placeholder="Bearer pat_xxx…" autocomplete="off" />
+        <h2 class="section-title">API 配置</h2>
+
+        <!-- 供应商切换 Tab -->
+        <div class="provider-tabs">
+          <button class="provider-tab active" data-provider="ark">火山引擎</button>
+          <button class="provider-tab" data-provider="openai">OpenAI GPT Image 2</button>
         </div>
-        <div class="field">
-          <label for="workflow-id">Workflow ID <span class="required">*</span></label>
-          <input id="workflow-id" type="text" placeholder="7xxxxxxxxxxxxx" />
+
+        <!-- 火山引擎配置 -->
+        <div id="provider-panel-ark" class="provider-panel">
+          <div class="field">
+            <label for="ark-api-key">API Key</label>
+            <input id="ark-api-key" type="password" placeholder="api-key-xxx…" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="ark-model">生图模型</label>
+            <select id="ark-model">
+              <option value="doubao-seedream-5-0-260128">Seedream 5.0 Lite（推荐）</option>
+              <option value="doubao-seedream-4-5-t2i-250428">Seedream 4.5</option>
+              <option value="custom">自定义 Model ID…</option>
+            </select>
+          </div>
+          <div class="field" id="ark-model-custom-field" style="display:none">
+            <input id="ark-model-custom" type="text" placeholder="输入 Model ID，如 doubao-xxx" />
+          </div>
+        </div>
+
+        <!-- OpenAI 配置 -->
+        <div id="provider-panel-openai" class="provider-panel" style="display:none">
+          <div class="provider-notice">
+            GPT Image 2 仅支持固定尺寸（最大 1536px），各营销尺寸将自动映射到最接近的支持比例。需科学上网方可调用。
+          </div>
+          <div class="field">
+            <label for="openai-api-key">API Key</label>
+            <input id="openai-api-key" type="password" placeholder="sk-…" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="openai-quality">图像质量</label>
+            <select id="openai-quality">
+              <option value="medium">Medium（推荐，$0.042/张）</option>
+              <option value="low">Low（$0.011/张）</option>
+              <option value="high">High（$0.167/张）</option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -83,7 +123,13 @@
     <main class="canvas">
       <div class="canvas-header">
         <h2 class="canvas-title">生成结果</h2>
-        <button class="btn-secondary" id="download-all-btn" disabled>下载全部</button>
+        <div class="canvas-actions">
+          <span class="select-count" id="select-count" style="display:none"></span>
+          <button class="btn-link" id="result-select-all" style="display:none">全选</button>
+          <button class="btn-link" id="result-deselect-all" style="display:none">全不选</button>
+          <button class="btn-secondary" id="download-selected-btn" disabled style="display:none">下载已选</button>
+          <button class="btn-secondary" id="download-all-btn" disabled>下载全部</button>
+        </div>
       </div>
       <div class="result-grid" id="result-grid">
         <div class="empty-state">
@@ -92,6 +138,13 @@
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- 灯箱 -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightbox-close">✕</button>
+    <img id="lightbox-img" src="" alt="" />
+    <div class="lightbox-label" id="lightbox-label"></div>
   </div>
 
   <script src="app.js"></script>
