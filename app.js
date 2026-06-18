@@ -28,6 +28,7 @@ const SIZES = [
   { id: 'popup',       name: '营销弹窗',   w: 2240, h: 2816, orientation: 'v' },
   { id: 'banner-oil',  name: '油电banner', w: 3326, h: 1472, orientation: 'h' },
   { id: 'banner-new',  name: '新增banner', w: 4578, h: 1200, orientation: 'h' },
+  { id: 'special',     name: '特殊尺寸',   w: 2808, h: 448,  orientation: 'h' },
 ];
 
 // 当前生成任务状态 { sizeId: { status:'loading'|'done'|'error', url, error } }
@@ -204,9 +205,11 @@ function overridePromptField(text, fieldNames, value) {
   return text;
 }
 
-function buildPrompt(size, inputs) {
+function buildPrompt(size, inputs, canvasSize) {
   const { theme, headline, tagText, buttonText, promptText } = inputs;
   const isH = size.orientation === 'h';
+  // 用真实送给 API 的画布尺寸描述比例，避免与实际生成画布的宽高比不一致导致画中画
+  const canvas = canvasSize || size;
 
   // 用输入框内容覆盖提示词模板里的对应字段
   let mergedPrompt = promptText || '';
@@ -225,8 +228,8 @@ function buildPrompt(size, inputs) {
   const structuredPrefix = extraFields.join('\n');
 
   const layout = isH
-    ? `Horizontal banner layout ${size.w}x${size.h}px. Main visual element on the RIGHT half. Title, subtitle, tag and CTA button all LEFT-aligned on the LEFT half, text and button must NOT touch the edge, keep safe margin at least 8% from left and top/bottom edges.`
-    : `Vertical poster layout ${size.w}x${size.h}px. Title at the TOP, main visual in the CENTER, CTA button at the BOTTOM. All text and buttons must NOT touch the edge, keep safe margin at least 8% from all edges.`;
+    ? `Horizontal banner layout ${canvas.w}x${canvas.h}px. Main visual element on the RIGHT half. Title, subtitle, tag and CTA button all LEFT-aligned on the LEFT half, text and button must NOT touch the edge, keep safe margin at least 8% from left and top/bottom edges.`
+    : `Vertical poster layout ${canvas.w}x${canvas.h}px. Title at the TOP, main visual in the CENTER, CTA button at the BOTTOM. All text and buttons must NOT touch the edge, keep safe margin at least 8% from all edges.`;
 
   return [
     structuredPrefix,
@@ -275,14 +278,15 @@ async function handleGenerate() {
 
   // 每个尺寸并行调用 API
   await Promise.all(selectedSizes.map(async size => {
-    const prompt = buildPrompt(size, inputs);
     try {
       let url, actualSize;
       if (provider === 'openai') {
         const quality = document.getElementById('openai-quality').value;
+        const prompt = buildPrompt(size, inputs, mapToOpenAISize(size.w, size.h));
         ({ url, actualSize } = await callOpenAIImageGen(apiKey, quality, prompt, size));
       } else {
         const model = getModelId();
+        const prompt = buildPrompt(size, inputs, clampSize(size.w, size.h));
         url = await callArkImageGen(apiKey, model, prompt, size);
       }
       state.jobs[size.id] = { status: 'done', url, actualSize };
@@ -339,14 +343,15 @@ async function regenOne(size) {
   state.jobs[size.id] = { status: 'loading' };
   refreshCard(size, 'loading');
 
-  const prompt = buildPrompt(size, inputs);
   try {
     let url, actualSize;
     if (provider === 'openai') {
       const quality = document.getElementById('openai-quality').value;
+      const prompt = buildPrompt(size, inputs, mapToOpenAISize(size.w, size.h));
       ({ url, actualSize } = await callOpenAIImageGen(apiKey, quality, prompt, size));
     } else {
       const model = getModelId();
+      const prompt = buildPrompt(size, inputs, clampSize(size.w, size.h));
       url = await callArkImageGen(apiKey, model, prompt, size);
     }
     state.jobs[size.id] = { status: 'done', url, actualSize };
